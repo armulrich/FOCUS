@@ -1,0 +1,3 @@
+mpi4py
+f90wrap
+python_version == "3.11"

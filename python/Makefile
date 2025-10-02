@@ -99,7 +99,6 @@ f90wrap_clean:
 $(LIB_NAME): | sources-build
 	$(LIBTOOL) $@ \
 	  $(addprefix $(SOURCES)/, $(LIBSRC_WRAP_OBJECTS) $(EXTRA_OBJS))
-
 ifeq ($(findstring libtool,$(LIBTOOL)),libtool)
 	ranlib $@
 endif
