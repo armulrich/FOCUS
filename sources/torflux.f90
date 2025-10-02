@@ -95,72 +95,72 @@ subroutine torflux( ideriv )
 ! ideriv = 1 -> calculate the toroidal flux constraint and its first derivatives;
 ! ideriv = 2 -> calculate the toroidal flux constraint and its first & second derivatives;
 !------------------------------------------------------------------------------------------------------   
-  use globals, only: dp, zero, half, one, pi2, sqrtmachprec, bsconstant, ncpu, myid, ounit, &
-       coil, DoF, surf, Ncoils, Nteta, Nzeta, discretefactor, Cdof, &
-       tflux, t1F, t2F, Ndof, psi_avg, target_tflux, &
-       itflux, mtflux, LM_fvec, LM_fjac, weight_tflux, MPI_COMM_FAMUS
+   use globals, only: dp, zero, half, one, pi2, sqrtmachprec, bsconstant, ncpu, myid, ounit, &
+         coil, DoF, surf, Ncoils, Nteta, Nzeta, discretefactor, Cdof, &
+         tflux, t1F, t2F, Ndof, psi_avg, target_tflux, &
+         itflux, mtflux, LM_fvec, LM_fjac, weight_tflux, MPI_COMM_FAMUS
 
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
 
-  INTEGER, INTENT(in)                   :: ideriv
-  !--------------------------------------------------------------------------------------------
-  INTEGER                               :: astat, ierr
-  INTEGER                               :: icoil, iteta, jzeta, idof, ND, ip
-  REAL                                  :: dflux, lflux, lsum
-  REAL                                  :: lax, lay, laz          ! local Ax, Ay and Az
-  REAL, dimension(0:Cdof, 0:Cdof)       :: dAx, dAy, dAz          ! dA of each coil;
-  REAL, dimension(1:Ndof, 0:Nzeta-1)    :: ldF, dF
-  REAL, dimension(0:Nzeta-1)            :: ldiff, psi_diff
-  !--------------------------initialize and allocate arrays------------------------------------- 
+   INTEGER, INTENT(in)                   :: ideriv
+   !--------------------------------------------------------------------------------------------
+   INTEGER                               :: astat, ierr
+   INTEGER                               :: icoil, iteta, jzeta, idof, ND, ip
+   REAL                                  :: dflux, lflux, lsum
+   REAL                                  :: lax, lay, laz          ! local Ax, Ay and Az
+   REAL, dimension(0:Cdof, 0:Cdof)       :: dAx, dAy, dAz          ! dA of each coil;
+   REAL, dimension(1:Ndof, 0:Nzeta-1)    :: ldF, dF
+   REAL, dimension(0:Nzeta-1)            :: ldiff, psi_diff
+   !--------------------------initialize and allocate arrays------------------------------------- 
 
-  tflux = zero ; lsum = zero ; psi_avg = zero ; dflux = zero ; psi_diff = zero
-  ldiff = zero ; lax = zero; lay = zero; laz = zero      !already allocted; reset to zero;
+   tflux = zero ; lsum = zero ; psi_avg = zero ; dflux = zero ; psi_diff = zero
+   ldiff = zero ; lax = zero; lay = zero; laz = zero      !already allocted; reset to zero;
 
-  !-------------------------------calculate Bn-------------------------------------------------- 
-  if( ideriv >= 0 ) then
-     
-     do jzeta = 0, Nzeta - 1
-        if( myid.ne.modulo(jzeta,ncpu) ) cycle ! parallelization loop; 
+   !-------------------------------calculate Bn-------------------------------------------------- 
+   if( ideriv >= 0 ) then
+      
+      do jzeta = 0, Nzeta - 1
+         if( myid.ne.modulo(jzeta,ncpu) ) cycle ! parallelization loop; 
          
-        lflux = zero
-        do iteta = 0, Nteta - 1
-           lax = zero; lay = zero; laz = zero
-           do ip = 1, 1
-              do icoil = 1, Ncoils
-                 call bpotential0(icoil+(ip-1)*Ncoils, iteta, jzeta, dAx(0,0), dAy(0,0), dAz(0,0))
-                 lax = lax + dAx( 0, 0) * coil(icoil)%I * bsconstant
-                 lay = lay + dAy( 0, 0) * coil(icoil)%I * bsconstant
-                 laz = laz + dAz( 0, 0) * coil(icoil)%I * bsconstant
-              enddo ! end do icoil
-           enddo  ! end do ip;
+         lflux = zero
+         do iteta = 0, Nteta - 1
+            lax = zero; lay = zero; laz = zero
+            do ip = 1, 1
+               do icoil = 1, Ncoils
+                  call bpotential0(icoil+(ip-1)*Ncoils, iteta, jzeta, dAx(0,0), dAy(0,0), dAz(0,0))
+                  lax = lax + dAx( 0, 0) * coil(icoil)%I * bsconstant
+                  lay = lay + dAy( 0, 0) * coil(icoil)%I * bsconstant
+                  laz = laz + dAz( 0, 0) * coil(icoil)%I * bsconstant
+               enddo ! end do icoil
+            enddo  ! end do ip;
 
-           lflux = lflux + lax * surf(1)%xt(iteta,jzeta) + &    ! local flux;
+            lflux = lflux + lax * surf(1)%xt(iteta,jzeta) + &    ! local flux;
                            lay * surf(1)%yt(iteta,jzeta) + &
                            laz * surf(1)%zt(iteta,jzeta)
-        enddo ! end do iteta
-        lflux = lflux * pi2/Nteta ! discretization factor;
-        lsum  = lsum + lflux
-        ldiff(jzeta) = lflux - target_tflux
-        dflux = dflux + ldiff(jzeta)**2
-     enddo ! end do jzeta
+         enddo ! end do iteta
+         lflux = lflux * pi2/Nteta ! discretization factor;
+         lsum  = lsum + lflux
+         ldiff(jzeta) = lflux - target_tflux
+         dflux = dflux + ldiff(jzeta)**2
+      enddo ! end do jzeta
 
-     call MPI_BARRIER( MPI_COMM_FAMUS, ierr )
-     call MPI_REDUCE( dflux, tflux  , 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
-     call MPI_REDUCE( lsum , psi_avg, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
-     call MPI_REDUCE( ldiff, psi_diff, Nzeta, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
+      call MPI_BARRIER( MPI_COMM_FAMUS, ierr )
+      call MPI_REDUCE( dflux, tflux  , 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
+      call MPI_REDUCE( lsum , psi_avg, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
+      call MPI_REDUCE( ldiff, psi_diff, Nzeta, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
                
-     RlBCAST( psi_avg, 1, 0)
-     RlBCAST( tflux, 1, 0)
-     RlBCAST( psi_diff, Nzeta, 0)
-     
-     psi_avg = psi_avg / Nzeta
-     tflux = half * tflux / Nzeta 
+      RlBCAST( psi_avg, 1, 0)
+      RlBCAST( tflux, 1, 0)
+      RlBCAST( psi_diff, Nzeta, 0)
+      
+      psi_avg = psi_avg / Nzeta
+      tflux = half * tflux / Nzeta 
 
-     ! Another type of target functions
-     if (mtflux > 0) then
-        LM_fvec(itflux+1:itflux+mtflux) = weight_tflux * psi_diff(0:Nzeta-1)
-     endif
+      ! Another type of target functions
+      if (mtflux > 0) then
+         LM_fvec(itflux+1:itflux+mtflux) = weight_tflux * psi_diff(0:Nzeta-1)
+      endif
   
   endif
 
@@ -243,13 +243,12 @@ subroutine bpotential0(icoil, iteta, jzeta, Ax, Ay, Az)
 ! Biot-Savart constant and currents are not included for later simplication.
 ! Discretizing factor is includeed; coil(icoil)%dd(kseg) 
 !------------------------------------------------------------------------------------------------------   
-  use globals, only: dp, coil, surf, Ncoils, Nteta, Nzeta, &
+   use globals, only: dp, coil, surf, Ncoils, Nteta, Nzeta, &
                      zero, myid, ounit, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
-
-  INTEGER, intent(in ) :: icoil, iteta, jzeta
-  REAL   , intent(out) :: Ax, Ay, Az
+   use mpi
+   implicit none
+   INTEGER, intent(in ) :: icoil, iteta, jzeta
+   REAL   , intent(out) :: Ax, Ay, Az
 
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
 
@@ -296,13 +295,13 @@ subroutine bpotential1(icoil, iteta, jzeta, Ax, Ay, Az, ND)
 ! Biot-Savart constant and currents are not included for later simplication.
 ! Discretizing factor is includeed; coil(icoil)%dd(kseg) 
 !------------------------------------------------------------------------------------------------------    
-  use globals, only: dp, coil, DoF, surf, NFcoil, Ncoils, Nteta, Nzeta, &
+   use globals, only: dp, coil, DoF, surf, NFcoil, Ncoils, Nteta, Nzeta, &
                      zero, myid, ounit, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none  
 
-  INTEGER, intent(in ) :: icoil, iteta, jzeta, ND
-  REAL, dimension(1:1, 1:ND), intent(inout) :: Ax, Ay, Az
+   INTEGER, intent(in ) :: icoil, iteta, jzeta, ND
+   REAL, dimension(1:1, 1:ND), intent(inout) :: Ax, Ay, Az
 
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
 

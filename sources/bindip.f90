@@ -19,8 +19,8 @@ SUBROUTINE bindip(ideriv)
   ! purpose to encourage binary values for dipole strength
   use globals, only: dp, zero, ncpu, myid, ounit, Nfp, &
        pmsum, dpbin, t1V, t1D, coil, Ndof, Ncoils, DoF, total_moment, dof_offset, ldof, momentq, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
   INTEGER, INTENT(in) :: ideriv
 
   INTEGER             :: astat, ierr, icoil, idof, ND, ivec

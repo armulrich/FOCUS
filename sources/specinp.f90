@@ -8,9 +8,8 @@ SUBROUTINE specinp
   !-------------------------------------------------------------------------------!
   use globals, only: dp, zero, half, two, pi2, mu0,  myid, wunit, ounit,  surf, bn, ext, &
                      Nfou, Nfp_raw, bim, bin, Rbc, Rbs, Zbc, Zbs, Nteta, Nzeta
-  implicit none
-  include "mpif.h"
-  !-------------------------------------------------------------------------------
+  use mpi
+implicit none  !-------------------------------------------------------------------------------
   INTEGER             :: mf, nf  ! Fourier modes size
   INTEGER             :: imn=0, ii, jj, im, in, astat, ierr, Nbf, iteta, jzeta
   REAL                :: teta, zeta, arg, tol, tmpc, tmps, curtor, curpol

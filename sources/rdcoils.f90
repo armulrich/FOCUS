@@ -96,10 +96,8 @@ subroutine rdcoils
   use globals
   use ncsx_ports_eval, only: in_ncsx_port
 
+  use mpi
   implicit none
-
-  include "mpif.h"
-
   LOGICAL   :: exist, in_port
   INTEGER   :: icoil, maxnseg, ifirst, NF, itmp, ip, icoef, total_coef, num_pm, num_bg, & 
                num_per_array, num_tor, ipol, itor, offset, icpu, iskip
@@ -301,16 +299,16 @@ subroutine discoil(ifirst)
 ! if ifirst = 1, it will update all the coils; otherwise, only update free coils;
 ! date: 20170314
 !---------------------------------------------------------------------------------------------
-  use globals, only: dp, zero, pi2, myid, ounit, coil, FouCoil, Ncoils, DoF, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+   use globals, only: dp, zero, pi2, myid, ounit, coil, FouCoil, Ncoils, DoF, MPI_COMM_FAMUS
+   use mpi
+   implicit none
 
-  INTEGER, intent(in) :: ifirst
+   INTEGER, intent(in) :: ifirst
 
-  INTEGER          :: icoil, iseg, mm, NS, NF, ierr, astat, ip
-  REAL             :: tt
-  REAL,allocatable :: cmt(:,:), smt(:,:)
-  !-------------------------------------------------------------------------------------------
+   INTEGER          :: icoil, iseg, mm, NS, NF, ierr, astat, ip
+   REAL             :: tt
+   REAL,allocatable :: cmt(:,:), smt(:,:)
+!-------------------------------------------------------------------------------------------
 
   do icoil = 1, Ncoils
 
@@ -465,8 +463,8 @@ END subroutine fouriermatrix
 SUBROUTINE readcoils(filename, maxnseg)
   use globals, only: dp, zero, coilsX, coilsY, coilsZ, coilsI, coilseg, coilname, Ncoils, ounit, myid, &
                      MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
 
   INTEGER, parameter         :: mcoil = 256, mseg = 1024 ! Largest coils and segments number
   INTEGER                    :: icoil, cunit, istat, astat, lstat, ierr, maxnseg, seg(1:mseg)
@@ -538,40 +536,41 @@ end SUBROUTINE READCOILS
 
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
 
-SUBROUTINE Fourier( X, XFC, XFS, Nsegs, NFcoil)
+SUBROUTINE Fourier( X, XFC, XFS, Nsegs, NFcoil )
   use globals, only: dp, ounit, zero, pi2, half, myid, MPI_COMM_FAMUS
   implicit none
-  include "mpif.h"
 
-  REAL    :: X(1:Nsegs), XFC(0:NFcoil), XFS(0:NFcoil)
-  INTEGER :: Nsegs, NFcoil, ifou, iseg, funit, ierr
-  REAL, allocatable:: A(:), B(:)
+  !---- dummy arguments
+  INTEGER,  intent(in)  :: Nsegs, NFcoil
+  REAL(dp), intent(in)  :: X(1:Nsegs)
+  REAL(dp), intent(out) :: XFC(0:NFcoil), XFS(0:NFcoil)
 
-  allocate(A(0:Nsegs-1))
-  allocate(B(0:Nsegs-1))
+  !---- locals
+  INTEGER  :: ifou, iseg, ierr
+  REAL(dp), allocatable :: A(:), B(:)
 
   FATAL(Fourier, Nsegs < 2*NFcoil, Nsegs too small)
-  A = zero; B = zero
+
+  allocate(A(0:Nsegs-1), B(0:Nsegs-1))
+  A = zero
+  B = zero
 
   do ifou = 0, Nsegs-1
-
      do iseg = 1, Nsegs
-        A(ifou) = A(ifou) + X(iseg)*cos(ifou*pi2*(iseg-1)/Nsegs)
-        B(ifou) = B(ifou) + X(iseg)*sin(ifou*pi2*(iseg-1)/Nsegs)
+        A(ifou) = A(ifou) + X(iseg)*cos( ifou*pi2*(iseg-1)/Nsegs )
+        B(ifou) = B(ifou) + X(iseg)*sin( ifou*pi2*(iseg-1)/Nsegs )
      enddo
-
   enddo
 
-  A = 2.0/Nsegs * A; A(0) = half*A(0)
-  B = 2.0/Nsegs * B
+  A = 2.0_dp/Nsegs * A;  A(0) = half*A(0)
+  B = 2.0_dp/Nsegs * B
 
   XFC(0:NFcoil) = A(0:NFcoil)
   XFS(0:NFcoil) = B(0:NFcoil)
 
   deallocate(A, B)
-
   return
+END SUBROUTINE Fourier
 
-end SUBROUTINE Fourier
 
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!

@@ -11,9 +11,8 @@ SUBROUTINE diagnos
        dpbin, pmvol, pmsum, resbn, total_moment, magtorque, ext, normalized_B, bn_norm_b, symm_factor, & 
        discretefactor, MPI_COMM_FAMUS
                      
+  use mpi
   implicit none
-  include "mpif.h"
-
   INTEGER           :: icoil, itmp=0, astat, ierr, NF, idof, i, j,iteta, jzeta
   LOGICAL           :: lwbnorm = .True. , l_raw = .False.!if use raw coils data
   REAL              :: MaxCurv, AvgLength, MinCCdist, MinCPdist, tmp_dist, ReDot, ImDot, B(3), x, y, z
@@ -161,8 +160,8 @@ END SUBROUTINE diagnos
 subroutine curvature(icoil)
 
   use globals, only: dp, zero, pi2, ncpu, astat, ierr, myid, ounit, coil, NFcoil, Nseg, Ncoils
-  implicit none
-  include "mpif.h"
+  use mpi
+  implicit none  
 
   INTEGER, INTENT(in) :: icoil
 
@@ -217,8 +216,8 @@ end subroutine mindist
 subroutine importance(icoil)
   use globals, only: dp,  zero, pi2, ncpu, astat, ierr, myid, ounit, coil, NFcoil, Nseg, Ncoils, &
                      surf, Nteta, Nzeta, bsconstant, coil_importance, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+  use mpi
+  implicit none  
 
   INTEGER, INTENT(in) :: icoil  
 
@@ -242,9 +241,9 @@ subroutine importance(icoil)
   enddo ! end do jzeta
 
   call MPI_BARRIER( MPI_COMM_FAMUS, ierr )     
-  call MPI_ALLREDUCE( MPI_IN_PLACE, tbx, NumGrid, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
-  call MPI_ALLREDUCE( MPI_IN_PLACE, tby, NumGrid, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
-  call MPI_ALLREDUCE( MPI_IN_PLACE, tbz, NumGrid, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_FAMUS, ierr )
+  call MPI_ALLREDUCE(MPI_IN_PLACE, tbx, NumGrid, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_FAMUS, ierr)
+  call MPI_ALLREDUCE(MPI_IN_PLACE, tby, NumGrid, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_FAMUS, ierr)
+  call MPI_ALLREDUCE(MPI_IN_PLACE, tbz, NumGrid, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_FAMUS, ierr)
 
   coil_importance(icoil) = sum( (tbx*surf(1)%Bx + tby*surf(1)%By + tbz*surf(1)%Bz) / &
                                 (surf(1)%Bx**2 + surf(1)%By**2 + surf(1)%Bz**2) ) / NumGrid

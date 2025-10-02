@@ -181,9 +181,8 @@ subroutine costfun(ideriv)
        dpbin, t1D, t2D, weight_dpbin, &
        resbn, t1R,      weight_resbn
 
+  use mpi
   implicit none
-  include "mpif.h"
-
   INTEGER, INTENT(in) :: ideriv
   
   INTEGER             :: ivec
@@ -464,9 +463,8 @@ subroutine normweight
        pmvol, weight_pmvol, dpbin, weight_dpbin, MPI_COMM_FAMUS, &
        weight_resbn, resbn
 
+  use mpi
   implicit none  
-  include "mpif.h"
-
   INTEGER    :: ierr, icoil
   REAL       :: tmp, cur_tflux, modBn, modtBn
 
@@ -632,8 +630,8 @@ subroutine output (mark)
        evolution, xdof, DoF, exit_tol, exit_signal, sumDE, pmsum, pmvol, dpbin, MPI_COMM_FAMUS, &
        resbn
 
+  use mpi
   implicit none  
-  include "mpif.h"
 
   REAL, INTENT( IN ) :: mark
 

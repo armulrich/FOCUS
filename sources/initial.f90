@@ -357,7 +357,7 @@ subroutine check_input
   ! initialize iteration and total iterations;
   iout = 1 ; Nouts = 1
   if (case_optimize >0) then
-     Nouts = DF_maxiter + CG_maxiter + +QN_maxiter + LM_maxiter + SA_maxiter
+     Nouts = DF_maxiter + CG_maxiter + QN_maxiter + LM_maxiter + SA_maxiter
      Nouts = max(1, HY_maxiter) * Nouts
   endif
 

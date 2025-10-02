@@ -19,8 +19,8 @@ SUBROUTINE minvol(ideriv)
   ! Here momentq is even to make sure M>0
   use globals, only: dp, zero, ncpu, myid, ounit, Nfp, &
        pmsum, t1V, coil, Ndof, Ncoils, DoF, total_moment, dof_offset, ldof, momentq, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
   INTEGER, INTENT(in) :: ideriv
 
   INTEGER             :: astat, ierr, icoil, idof, ND, ivec

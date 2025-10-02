@@ -63,8 +63,8 @@ subroutine length(ideriv)
        coil, DoF, Ncoils, Nfixgeo, Ndof, ttlen, t1L, t2L, case_length, &
        ittlen, mttlen, LM_fvec, LM_fjac, weight_ttlen, MPI_COMM_FAMUS
 
-  implicit none
-  include "mpif.h"
+  use mpi
+  implicit none  
   INTEGER, INTENT(in) :: ideriv
 
   INTEGER             :: astat, ierr, icoil, idof, ND, ivec
@@ -178,9 +178,8 @@ end subroutine length
 subroutine LenDeriv0(icoil, length)
 
   use globals, only: dp, zero, coil, myid, ounit, Ncoils, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
-
+  use mpi
+  implicit none  
   INTEGER, intent(in)  :: icoil
   REAL   , intent(out) :: length
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
@@ -209,11 +208,12 @@ end subroutine LenDeriv0
 subroutine LenDeriv1(icoil, derivs, ND)
 
   use globals, only: dp, zero, pi2, coil, DoF, myid, ounit, Ncoils, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+  use mpi
+  implicit none  
 
   INTEGER, intent(in)  :: icoil, ND
   REAL   , intent(out) :: derivs(1:1, 1:ND)
+  
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
   INTEGER              :: kseg, astat, ierr
   REAL                 :: dl3, xt, yt, zt, xa, ya, za

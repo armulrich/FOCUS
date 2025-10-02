@@ -340,9 +340,8 @@ SUBROUTINE write_plasma
                       discretefactor, shift, IsSymmetric, MPI_COMM_FAMUS, & 
                       Pmnc, Pmns, case_surface
   
-  implicit none  
-  include "mpif.h"
-
+  use mpi
+implicit none
   !-------------------------------------------------------------------------------
   INTEGER             :: mf, nf  ! predefined Fourier modes size
   INTEGER             :: imn=0, ii, jj, im, in, astat, ierr, maxN, maxM

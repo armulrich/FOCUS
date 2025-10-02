@@ -26,9 +26,8 @@ SUBROUTINE packdof(lxdof)
   !--------------------------------------------------------------------------------------------- 
   use globals, only : dp, zero, myid, ounit, MPI_COMM_FAMUS, &
                     & case_coils, Ncoils, coil, DoF, Ndof, DoFnorm, dof_offset, ldof
+  use mpi
   implicit none
-  include "mpif.h"
-
   REAL    :: lxdof(1:Ndof)
   INTEGER :: idof, icoil, ND, astat, ierr
   !--------------------------------------------------------------------------------------------- 
@@ -104,9 +103,8 @@ SUBROUTINE unpacking(lxdof)
   !--------------------------------------------------------------------------------------------- 
   use globals, only: dp, zero, myid, ounit, MPI_COMM_FAMUS, &
        & case_coils, Ncoils, coil, DoF, Ndof, DoFnorm, dof_offset, ldof, momentq
-  implicit none
-  include "mpif.h"
-
+  use mpi
+  implicit none  
   REAL    :: lxdof(1:Ndof)
   INTEGER :: idof, icoil, ND, astat, ierr, ifirst
   !---------------------------------------------------------------------------------------------
@@ -180,8 +178,8 @@ SUBROUTINE packcoil
   ! DATE: 2017/03/25
   !--------------------------------------------------------------------------------------------- 
   use globals, only: dp, zero, myid, ounit, case_coils, Ncoils, coil, FouCoil, DoF, MPI_COMM_FAMUS
+  use mpi
   implicit none
-  include "mpif.h"
 
   INTEGER  :: icoil, idof, NF, ierr, astat
 
@@ -249,11 +247,10 @@ SUBROUTINE unpackcoil
   ! DATE: 2017/03/25
   !--------------------------------------------------------------------------------------------- 
   use globals, only: dp, zero, myid, ounit, case_coils, Ncoils, coil, FouCoil, DoF, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
-
+  use mpi
+  implicit none  
+  
   INTEGER  :: icoil, idof, NF, ierr, astat
-
   FATAL( unpackcoil01, .not. allocated(coil)   , illegal )
   ! FATAL( unpackcoil, .not. allocated(FouCoil), illegal )
   FATAL( unpackcoil02, .not. allocated(DoF)    , illegal )

@@ -69,9 +69,8 @@ subroutine fousurf
                       Nteta, Nzeta, surf, discretefactor, Nfp_raw, cosnfp, sinnfp, &
                       half_shift, shift, MPI_COMM_FAMUS, symm_factor
   
-  implicit none
-  
-  include "mpif.h"
+   use mpi
+   implicit none
   
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
   
@@ -159,8 +158,9 @@ subroutine fousurf
   !-------------output for check-------------------------------------------------------------------------
   if( myid == 0 .and. IsQuiet <= 0) then
      write(ounit, *) "-----------Reading surface-----------------------------------"
-     write(ounit, '("surface : Plasma boundary will be discretized in "I6" X "I6" elements.")') Nteta, Nzeta
-     write(ounit, '(8X": Nfou = " I06 " ; Nfp = " I06 " ; NBnf = " I06 " ;" )') Nfou, Nfp, NBnf
+     write(ounit, '("surface : Plasma boundary will be discretized in ",I6," X ",I6," elements.")') Nteta, Nzeta
+     write(ounit, '(8X,": Nfou = ",I6," ; Nfp = ",I6," ; NBnf = ",I6," ;")') Nfou, Nfp, NBnf
+
   endif
 
   if( myid == 0 .and. IsQuiet <= -2) then !very detailed output;
@@ -327,8 +327,8 @@ end subroutine fousurf
 
 subroutine surfcoord( theta, zeta, r, z)
   use globals, only: dp, zero, Nfou, bim, bin, Rbc, Rbs, Zbc, Zbs
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
 
   REAL, INTENT(in ) :: theta, zeta
   REAL, INTENT(out) :: r, z

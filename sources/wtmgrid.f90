@@ -14,9 +14,8 @@ subroutine wtmgrid
        sqrtmachprec, master, nmaster, nworker, masterid, color, myworkid, &
        MPI_COMM_MASTERS, MPI_COMM_MYWORLD, MPI_COMM_WORKERS, MPI_COMM_FAMUS
   use mgrid_focus
-  implicit none
-  include "mpif.h"
-
+  use mpi
+implicit none
   !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
 
   LOGICAL              :: exist

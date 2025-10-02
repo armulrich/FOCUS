@@ -53,8 +53,8 @@
 !!$  !----------------------------------------------------------------------------------------
 !!$  use globals, only: zero, half, myid, Ndof, Nteta, Nzeta, surf, &
 !!$                     bn, dB, bharm, t1H, Bmnc, Bmns, wBmn, tBmnc, tBmns, Bmnim, Bmnin, NBmn
-!!$  implicit none
-!!$  include "mpif.h"
+!!$   use mpi
+!!$   implicit none
 !!$
 !!$  INTEGER, INTENT(in) :: ideriv
 !!$  !----------------------------------------------------------------------------------------
@@ -128,8 +128,9 @@ SUBROUTINE readBmn
                      NBmn, Bmnin, Bmnim, wBmn, tBmnc, tBmns, carg, sarg, Nfp_raw, case_bnormal, &
                      input_harm, MPI_COMM_FAMUS
   use bharm_mod
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
+
 
   INTEGER  :: ii, jj, ij, imn, ierr, astat
   REAL     :: teta, zeta, arg
@@ -216,8 +217,8 @@ SUBROUTINE twodft(func, hs, hc, im, in, mn)
   ! Right now, it's using normal Fourier transforming, later FFT will be enabled.
   !-------------------------------------------------------------------------------!
   use globals, only: dp, zero, half, two, pi2, myid, ounit, Nteta, Nzeta, carg, sarg, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
   !-------------------------------------------------------------------------------
   REAL   , INTENT(in ) :: func(1:Nteta*Nzeta) ! 2D array into 1D array;
   REAL   , INTENT(out) :: hc(1:mn), hs(1:mn)
@@ -263,8 +264,8 @@ SUBROUTINE twoift(func, hs, hc, im, in, mn)
   ! Right now, it's using normal Fourier transforming, later FFT will be enabled.
   !-------------------------------------------------------------------------------!
   use globals, only: dp, zero, half, two, pi2, myid, ounit, Nteta, Nzeta, carg, sarg, MPI_COMM_FAMUS
+  use mpi
   implicit none
-  include "mpif.h"
   !-------------------------------------------------------------------------------
   REAL   , INTENT(out) :: func(1:Nteta*Nzeta) ! 2D array into 1D array;
   REAL   , INTENT(in ) :: hc(1:mn), hs(1:mn)
@@ -285,24 +286,24 @@ END SUBROUTINE twoift
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!
 
 SUBROUTINE saveBmn
-  !----------------------------------------------------------------------------------------
-  ! save the present Bmn harmonics in iBmnc and iBmns;
-  !----------------------------------------------------------------------------------------
-  use globals, only: dp, zero, ierr, astat, myid, machprec, weight_Bharm, &
+   !----------------------------------------------------------------------------------------
+   ! save the present Bmn harmonics in iBmnc and iBmns;
+   !----------------------------------------------------------------------------------------
+   use globals, only: dp, zero, ierr, astat, myid, machprec, weight_Bharm, &
                      NBmn, Bmnc, Bmns, iBmnc, iBmns, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
+   use mpi
+   implicit none
 
-  if (weight_bharm > machprec) then
+   if (weight_bharm > machprec) then
 
-     FATAL( saveBmn, .not. allocated( Bmnc), you should allocate  Bmnc first. )
-     FATAL( saveBmn, .not. allocated(iBmnc), you should allocate iBmnc first. )
+      FATAL( saveBmn, .not. allocated( Bmnc), you should allocate  Bmnc first. )
+      FATAL( saveBmn, .not. allocated(iBmnc), you should allocate iBmnc first. )
 
-     iBmnc = Bmnc
-     iBmns = Bmns
+      iBmnc = Bmnc
+      iBmns = Bmns
 
-  endif
+   endif
 
-  return
+   return
 
 END SUBROUTINE saveBmn

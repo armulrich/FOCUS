@@ -28,9 +28,8 @@ subroutine rdknot
                       NFcoil, knotsurf, knotphase, &
                       xkc, xks, ykc, yks, zkc, zks!, kspring, tauend, itau
   
+  use mpi
   implicit none
-  
-  include "mpif.h"
   
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!!
   
@@ -202,9 +201,8 @@ subroutine knotxx( aa, teta, zeta, ax, at, az, xx, xt, xz )
                       case_surface, NFcoil, knotphase, &
                       xkc, xks, ykc, yks, zkc, zks, MPI_COMM_FAMUS
   
+  use mpi
   implicit none
-  
-  include "mpif.h"
   
 !-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!!
   

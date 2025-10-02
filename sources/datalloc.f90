@@ -8,9 +8,8 @@ subroutine AllocData(itype)
   !------------------------------------------------------------------------------------------------------
   use globals
   use bnorm_mod
-  implicit none
-  include "mpif.h"
-
+  use mpi
+implicit none
   INTEGER, intent(in) :: itype
 
   INTEGER             :: icoil, idof, ND, NF, icur, imag, icpu, dof_array(0:ncpu-1)

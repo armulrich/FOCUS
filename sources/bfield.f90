@@ -29,9 +29,8 @@ subroutine bfield0(icoil, x, y, z, tBx, tBy, tBz)
 !------------------------------------------------------------------------------------------------------   
   use globals, only: dp, coil, surf, Ncoils, Nteta, Nzeta, cosnfp, sinnfp, Nfp_raw, MPI_COMM_FAMUS, &
                      zero, myid, ounit, Nfp, pi2, half, two, one, bsconstant, momentq, machprec
-  implicit none
-  include "mpif.h"
-
+  use mpi
+implicit none
   INTEGER, intent(in ) :: icoil
   REAL,    intent(in ) :: x, y, z
   REAL   , intent(out) :: tBx, tBy, tBz
@@ -150,9 +149,8 @@ subroutine bfield1(icoil, x, y, z, tBx, tBy, tBz, ND)
 !------------------------------------------------------------------------------------------------------   
   use globals, only: dp, coil, DoF, surf, NFcoil, Ncoils, Nteta, Nzeta, Nfp_raw, &
                      zero, myid, ounit, one, bsconstant, cosnfp, sinnfp, momentq, MPI_COMM_FAMUS
-  implicit none
-  include "mpif.h"
-
+  use mpi
+implicit none
   INTEGER, intent(in ) :: icoil, ND
   REAL,    intent(in ) :: x, y, z
   REAL, dimension(1:1, 1:ND), intent(inout) :: tBx, tBy, tBz
